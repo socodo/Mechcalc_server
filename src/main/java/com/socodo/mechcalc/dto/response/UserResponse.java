@@ -1,6 +1,6 @@
 package com.socodo.mechcalc.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +23,6 @@ public class UserResponse {
     private String organization;
     private String status;
     private Integer failedLoginAttempts;
-    private LocalDateTime lockedUntil;
-    private LocalDateTime createdAt;
+    private Instant lockedUntil;
+    private Instant createdAt;
 }

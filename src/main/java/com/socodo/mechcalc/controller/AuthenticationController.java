@@ -1,11 +1,12 @@
 package com.socodo.mechcalc.controller;
 
-import com.socodo.mechcalc.dto.request.AuthenticationRequest;
-import com.socodo.mechcalc.dto.request.IntrospectRequest;
-import com.socodo.mechcalc.dto.response.ApiResponse;
-import com.socodo.mechcalc.dto.response.AuthenticationResponse;
-import com.socodo.mechcalc.dto.response.IntrospectResponse;
+import com.socodo.mechcalc.dto.request.*;
+import com.socodo.mechcalc.dto.response.*;
+
 import com.socodo.mechcalc.service.AuthenticationService;
+import com.socodo.mechcalc.service.UserService;
+import com.socodo.mechcalc.dto.request.RefreshRequest;
+
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,26 +22,36 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationController {
 
+    UserService userService;
     AuthenticationService authenticationService;
 
+    @PostMapping("/register")
+    public ApiResponse<UserResponse> register(@Valid @RequestBody UserCreateRequest request) {
+        UserResponse result = userService.registerUser(request);
+        return ApiResponse.success("Registration successful", result);
+    }
+
     @PostMapping("/login")
-    public ApiResponse<AuthenticationResponse> authenticate(
-            @Valid @RequestBody AuthenticationRequest request
-    ) {
-        AuthenticationResponse result = authenticationService.authenticated(request);
-        return ApiResponse.<AuthenticationResponse>builder()
-                .code("SUCCESS")
-                .success(true)
-                .message("Login successful")
-                .data(result)
-                .build();
+    public ApiResponse<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
+        AuthenticationResponse result = authenticationService.authenticate(request);
+        return ApiResponse.success("Login successful", result);
+    }
+
+    @PostMapping("/google")
+    public ApiResponse<AuthenticationResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        AuthenticationResponse result = authenticationService.googleLogin(request);
+        return ApiResponse.success("Google login successful", result);
     }
 
     @PostMapping("/introspect")
-    public ApiResponse<IntrospectResponse> introspect(
-            @Valid @RequestBody IntrospectRequest request
-    ) {
+    public ApiResponse<IntrospectResponse> introspect(@Valid @RequestBody IntrospectRequest request) {
         IntrospectResponse result = authenticationService.introspect(request);
-        return ApiResponse.success("Token introspection completed", result);
+        return ApiResponse.success("Token valid", result);
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthenticationResponse> refreshToken(@Valid @RequestBody RefreshRequest request){
+        AuthenticationResponse result = authenticationService.refreshToken(request);
+        return ApiResponse.success("Token refreshed successfully", result);
     }
 }

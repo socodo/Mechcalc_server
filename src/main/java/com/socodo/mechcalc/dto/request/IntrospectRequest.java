@@ -13,7 +13,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IntrospectRequest {
-
     @NotBlank(message = "Access token is required")
     private String accessToken;
 }

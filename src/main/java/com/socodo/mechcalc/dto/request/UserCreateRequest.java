@@ -3,7 +3,6 @@ package com.socodo.mechcalc.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +21,10 @@ public class UserCreateRequest {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6")
+    @Pattern(
+    regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$", 
+    message = "Password must be at least 8 characters, including letters and numbers"
+)
     private String password;
 
     @NotBlank(message = "Full name is required")

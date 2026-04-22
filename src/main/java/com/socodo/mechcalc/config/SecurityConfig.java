@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +22,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -42,18 +46,10 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
-                "/auth/login",
-                "/auth/introspect",
-                "/users/register",
-                "/mechcalc/auth/login",
-                "/mechcalc/auth/introspect",
-                "/mechcalc/users/register",
-                "/v3/api-docs/**",
-                "/mechcalc/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html",
-                "/mechcalc/swagger-ui/**",
-                "/mechcalc/swagger-ui.html"
+              "/auth/**",             
+                    "/v3/api-docs/**",     
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
             ).permitAll()
             .anyRequest().authenticated())
         .exceptionHandling(exception -> exception

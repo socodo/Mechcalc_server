@@ -21,13 +21,16 @@ public class JwtService {
 
     private final SecretKey signingKey;
     private final long accessTokenExpirationMillis;
+    private final long refreshTokenExpirationMillis;
 
     public JwtService(
             @Value("${security.jwt.secret-key}") String secretKey,
-            @Value("${security.jwt.expiration-time}") long accessTokenExpirationMillis
+            @Value("${security.jwt.expiration-time}") long accessTokenExpirationMillis,
+            @Value("${security.jwt.refresh-token-expiration}") long refreshTokenExpirationMillis
     ) {
         this.signingKey = buildSigningKey(secretKey);
         this.accessTokenExpirationMillis = accessTokenExpirationMillis;
+        this.refreshTokenExpirationMillis = refreshTokenExpirationMillis;
     }
 
     public String generateAccessToken(User user) {
@@ -35,11 +38,15 @@ public class JwtService {
     }
 
     public String generateRefreshToken(User user) {
-        return generateToken(user, accessTokenExpirationMillis * 24, "refresh");
+        return generateToken(user, refreshTokenExpirationMillis, "refresh");
     }
 
     public long getAccessTokenExpirationSeconds() {
         return accessTokenExpirationMillis / 1000;
+    }
+
+    public long getRefreshTokenExpirationSeconds() {
+        return refreshTokenExpirationMillis / 1000;
     }
 
     public boolean isTokenValid(String token) {
@@ -49,7 +56,7 @@ public class JwtService {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException exception) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
@@ -57,9 +64,19 @@ public class JwtService {
     public boolean isAccessTokenValid(String token) {
         try {
             Claims claims = extractAllClaims(token);
-            Object type = claims.get("type");
+            String type = claims.get("type", String.class);
             return "access".equals(type);
-        } catch (JwtException | IllegalArgumentException exception) {
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean isRefreshTokenValid(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            String type = claims.get("type", String.class);
+            return "refresh".equals(type);
+        } catch (Exception e) {
             return false;
         }
     }
@@ -68,12 +85,16 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
 
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
+
     private String generateToken(User user, long expirationMillis, String type) {
         Instant now = Instant.now();
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId() != null ? user.getId().toString() : null);
-        claims.put("email", user.getEmail());
         claims.put("type", type);
+        claims.put("role", user.getRole());
 
         return Jwts.builder()
                 .setClaims(claims)

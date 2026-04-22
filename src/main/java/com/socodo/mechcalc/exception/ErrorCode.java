@@ -14,7 +14,6 @@ public enum ErrorCode {
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "User already exists"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden");
-
     private final HttpStatus status;
     private final String message;
 }
