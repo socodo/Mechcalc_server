@@ -1,6 +1,5 @@
 package com.socodo.mechcalc.config;
 
-import com.socodo.mechcalc.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +14,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.socodo.mechcalc.auth.service.JwtService;
+
 import java.util.List;
 @Slf4j
 @Component

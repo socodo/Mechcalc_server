@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.socodo.mechcalc.dto.response.ApiResponse;
+import com.socodo.mechcalc.common.dto.response.ApiResponse;
+
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -51,6 +52,8 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html"
             ).permitAll()
+            .requestMatchers(org.springframework.http.HttpMethod.GET, "/users").hasAuthority("ADMIN")
+            .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/users/**").hasAuthority("ADMIN")
             .anyRequest().authenticated())
         .exceptionHandling(exception -> exception
             .authenticationEntryPoint((request, response, authException) ->
