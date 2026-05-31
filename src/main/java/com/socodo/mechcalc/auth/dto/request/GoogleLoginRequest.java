@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GoogleLoginRequest {
 
-    @NotBlank(message = "Google ID is required")
+    @NotBlank(message = "Google ID token không được để trống")
     String idToken;
     
 }

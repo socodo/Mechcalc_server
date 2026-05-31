@@ -1,4 +1,4 @@
-package com.socodo.mechcalc.auth.dto.respone;
+package com.socodo.mechcalc.auth.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

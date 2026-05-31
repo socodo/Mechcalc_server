@@ -57,9 +57,9 @@ public class SecurityConfig {
             .anyRequest().authenticated())
         .exceptionHandling(exception -> exception
             .authenticationEntryPoint((request, response, authException) ->
-                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED", "Unauthorized"))
+                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED", "Bạn cần đăng nhập để tiếp tục."))
             .accessDeniedHandler((request, response, accessDeniedException) ->
-                writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "FORBIDDEN", "Forbidden")))
+                writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "FORBIDDEN", "Bạn không có quyền thực hiện thao tác này.")))
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();

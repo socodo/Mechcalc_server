@@ -15,8 +15,10 @@ public class MotorCalculationRequest {
     private Double nPreliminary;
     private Double uTotalReal;
     private Double uHReal;
+    private Double unt;
     private Double u1;
     private Double u2;
+    private Double ux;
     private Long selectedMotorId;
     private KinematicTableResponse kinematicTable; 
 }

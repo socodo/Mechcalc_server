@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface MotorCalculationRepository extends JpaRepository<MotorCalculation, UUID> {
     Optional<MotorCalculation> findByProjectId(UUID projectId);
+    Optional<MotorCalculation> findByProjectIdAndProjectUserEmail(UUID projectId, String email);
 }

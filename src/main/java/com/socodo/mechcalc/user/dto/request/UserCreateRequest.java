@@ -16,21 +16,21 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserCreateRequest {
 
-    @Email(message = "Email is not valid")
-    @NotBlank(message = "Email is required")
+    @Email(message = "Định dạng email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
     private String email;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "Mật khẩu không được để trống")
     @Pattern(
     regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$", 
     message = "Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
 )
     private String password;
 
-    @NotBlank(message = "Full name is required")
+    @NotBlank(message = "Họ và tên không được để trống")
     private String fullName;
 
-    @Pattern(regexp = "^[0-9]{10}$", message = "Phone must be exactly 10 digits")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Số điện thoại phải gồm đúng 10 chữ số")
     private String phone;
 
     private String avatarUrl;

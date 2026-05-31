@@ -15,12 +15,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserUpdateRequest {
 
-    @Email(message = "Email is not valid")
+    @Email(message = "Định dạng email không hợp lệ")
     private String email;
 
     private String fullName;
 
-    @Pattern(regexp = "^[0-9]{10}$", message = "Phone must be exactly 10 digits")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Số điện thoại phải gồm đúng 10 chữ số")
     private String phone;
 
     private String avatarUrl;

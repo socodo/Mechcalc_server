@@ -18,7 +18,6 @@ public class ProjectResponse {
     String name;
     String description;
     Project.ProjectStatus status;
-    Project.SyncStatus syncStatus;
     Instant createdAt;
     Instant updatedAt;
 }

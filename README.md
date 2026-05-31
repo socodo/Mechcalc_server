@@ -2,7 +2,7 @@
 
 ## Giới thiệu
 
-MechCalc là ứng dụng REST API được xây dựng trên nền tảng Spring Boot, sử dụng kiến trúc phân tầng (Layered Architecture) theo best practices.
+MechCalc là ứng dụng REST API được xây dựng trên Spring Boot. Codebase hiện dùng cấu trúc theo feature/module, mỗi module tự chứa controller, service, DTO, entity, repository và mapper liên quan.
 
 ## Yêu cầu hệ thống
 
@@ -21,47 +21,39 @@ mechcalc/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/socodo/mechcalc/
-│   │   │   ├── config/           # Cấu hình ứng dụng (OpenAPI, Security, etc.)
-│   │   │   ├── controller/       # REST Controllers - Xử lý HTTP request/response
-│   │   │   ├── dto/              # Data Transfer Objects
-│   │   │   │   ├── request/      # Request DTOs (input validation)
-│   │   │   │   └── response/     # Response DTOs (API responses)
-│   │   │   ├── entity/           # JPA Entities - Ánh xạ database tables
-│   │   │   ├── exception/        # Custom exceptions
-│   │   │   │   └── handler/      # Global exception handlers
-│   │   │   ├── mapper/           # MapStruct mappers (Entity <-> DTO)
-│   │   │   ├── repository/       # Spring Data JPA Repositories
-│   │   │   ├── service/          # Business logic interfaces
-│   │   │   │   └── impl/         # Service implementations
-│   │   │   └── util/             # Utility classes
-│   │   │       └── constants/    # Application constants
+│   │   │   ├── auth/             # Authentication, JWT, Google login
+│   │   │   ├── user/             # User profile and admin user management
+│   │   │   ├── project/          # Project APIs and sync
+│   │   │   ├── motor/            # Motor catalog and calculation APIs
+│   │   │   ├── common/           # Shared DTOs and reusable API contracts
+│   │   │   ├── config/           # Security and application configuration
+│   │   │   └── exception/        # Error codes and global exception handling
 │   │   └── resources/
-│   │       ├── db/migration/     # Flyway migrations (nếu dùng)
-│   │       ├── static/           # Static resources
-│   │       ├── templates/        # Template files
 │   │       └── application.properties
 │   └── test/
-│       └── java/com/socodo/mechcalc/
-│           ├── controller/       # Controller unit tests
-│           ├── service/          # Service unit tests
-│           ├── repository/       # Repository tests
-│           └── integration/      # Integration tests
+│       ├── java/com/socodo/mechcalc/
+│       │   └── MechcalcApplicationTests.java
+│       └── resources/
+│           └── application-test.properties
 ├── .env.example                  # Environment variables template
 ├── .gitignore
 ├── pom.xml
 └── README.md
 ```
 
-## Mô tả các layer
+## Quy ước cấu trúc module
 
-| Layer          | Mô tả                                  | Quy tắc                                        |
-| -------------- | -------------------------------------- | ---------------------------------------------- |
-| **Controller** | Xử lý HTTP requests, validation input  | Không chứa business logic                      |
-| **Service**    | Business logic, transaction management | Gọi Repository, không gọi trực tiếp Controller |
-| **Repository** | Data access layer                      | Chỉ chứa queries, không có business logic      |
-| **DTO**        | Transfer data giữa layers              | Request/Response riêng biệt                    |
-| **Entity**     | Database mapping                       | Không expose trực tiếp ra API                  |
-| **Mapper**     | Convert Entity <-> DTO                 | Sử dụng MapStruct                              |
+Mỗi feature như `auth`, `user`, `project`, `motor` nên giữ cấu trúc nhất quán:
+
+| Package          | Vai trò                                                        |
+| ---------------- | -------------------------------------------------------------- |
+| `controller`     | Nhận HTTP request, validate input, trả `ApiResponse`           |
+| `service`        | Chứa business logic và transaction boundary                    |
+| `repository`     | Truy cập database bằng Spring Data JPA                         |
+| `entity`         | JPA entity, không expose trực tiếp ra API                      |
+| `dto/request`    | Request DTO và validation annotation                           |
+| `dto/response`   | Response DTO trả cho client                                    |
+| `mapper`         | MapStruct mapper chuyển đổi giữa entity và DTO                 |
 
 ## Cài đặt và chạy
 
@@ -85,10 +77,19 @@ nano .env
 Nội dung file `.env`:
 
 ```properties
-DB_URL=jdbc:postgresql://localhost:5432/mechcalc
-DB_USERNAME=postgres
-DB_PASSWORD=your_password
 SERVER_PORT=8080
+
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/mechcalc
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=your_password
+SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+
+SECURITY_JWT_SECRET_KEY=change-this-secret-key-to-at-least-32-bytes
+SECURITY_JWT_EXPIRATION_TIME=3600000
+SECURITY_JWT_REFRESH_TOKEN_EXPIRATION=604800000
+
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
 
 ### 3. Tạo database
@@ -103,6 +104,9 @@ CREATE DATABASE mechcalc;
 # Development
 ./mvnw spring-boot:run
 
+# Run tests
+./mvnw test
+
 # Hoặc build và chạy JAR
 ./mvnw clean package -DskipTests
 java -jar target/mechcalc-0.0.1-SNAPSHOT.jar
@@ -110,9 +114,9 @@ java -jar target/mechcalc-0.0.1-SNAPSHOT.jar
 
 ### 5. Truy cập
 
-- **API Base URL:** http://localhost:8080
-- **Swagger UI:** http://localhost:8080/swagger-ui.html
-- **API Docs:** http://localhost:8080/v3/api-docs
+- **API Base URL:** http://localhost:8080/api/v1
+- **Swagger UI:** http://localhost:8080/api/v1/swagger-ui.html
+- **API Docs:** http://localhost:8080/api/v1/v3/api-docs
 
 ## Git Flow
 

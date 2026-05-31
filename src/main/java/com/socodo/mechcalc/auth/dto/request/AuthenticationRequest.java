@@ -15,10 +15,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuthenticationRequest {
 
-    @Email(message = "Email is not valid")
-    @NotBlank(message = "Email is required")
+    @Email(message = "Định dạng email không hợp lệ")
+    @NotBlank(message = "Email không được để trống")
     private String email;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "Mật khẩu không được để trống")
     private String password;
 }

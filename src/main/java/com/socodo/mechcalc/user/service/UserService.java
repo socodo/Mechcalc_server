@@ -3,6 +3,7 @@ package com.socodo.mechcalc.user.service;
 import com.socodo.mechcalc.exception.AppException;
 import com.socodo.mechcalc.exception.ErrorCode;
 import com.socodo.mechcalc.user.dto.request.UserCreateRequest;
+import com.socodo.mechcalc.user.dto.request.UserStatusUpdateRequest;
 import com.socodo.mechcalc.user.dto.request.UserUpdateRequest;
 import com.socodo.mechcalc.user.dto.response.UserResponse;
 import com.socodo.mechcalc.user.entity.User;
@@ -59,20 +60,7 @@ public class UserService {
         return userMapper.toResponse(userRepository.save(user));
     }
 
-    //AUTH & ADMIN
-
-    @Transactional
-    public UserResponse registerUser(UserCreateRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
-        }
-
-        User user = userMapper.toEntity(request);
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setRole("USER"); 
-
-        return userMapper.toResponse(userRepository.save(user));
-    }
+    // ADMIN
 
     @Transactional
     public UserResponse createAdmin(UserCreateRequest request) {
@@ -95,6 +83,15 @@ public class UserService {
         return userRepository.findById(id)
                 .map(userMapper::toResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Transactional
+    public UserResponse updateUserStatus(UUID id, UserStatusUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setStatus(request.getStatus());
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     @Transactional

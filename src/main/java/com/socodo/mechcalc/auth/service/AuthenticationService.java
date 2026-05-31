@@ -5,7 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.socodo.mechcalc.auth.dto.request.*;
-import com.socodo.mechcalc.auth.dto.respone.*;
+import com.socodo.mechcalc.auth.dto.response.*;
 import com.socodo.mechcalc.exception.AppException;
 import com.socodo.mechcalc.exception.ErrorCode;
 import com.socodo.mechcalc.user.entity.User;
@@ -45,6 +45,8 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
 
+        validateActiveAccount(user);
+
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(Instant.now())) {
             throw new AppException(ErrorCode.ACCOUNT_LOCKED);
         }
@@ -71,8 +73,21 @@ public class AuthenticationService {
     }
 
     public IntrospectResponse introspect(IntrospectRequest request) {
+        boolean valid = jwtService.isAccessTokenValid(request.getAccessToken());
+
+        if (valid) {
+            try {
+                String email = jwtService.extractSubject(request.getAccessToken());
+                valid = userRepository.findByEmail(email)
+                        .filter(this::isActiveAccount)
+                        .isPresent();
+            } catch (RuntimeException exception) {
+                valid = false;
+            }
+        }
+
         return IntrospectResponse.builder()
-                .valid(jwtService.isAccessTokenValid(request.getAccessToken()))
+                .valid(valid)
                 .build();
     }
     
@@ -85,6 +100,8 @@ public class AuthenticationService {
         String email = jwtService.extractSubject(refreshToken);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
+
+        validateActiveAccount(user);
 
         return AuthenticationResponse.builder()
                 .accessToken(jwtService.generateAccessToken(user))
@@ -117,11 +134,13 @@ public class AuthenticationService {
                         .email(email)
                         .fullName(name)
                         .role("USER")
-                        .status("ACTIVE")
+                        .status(User.UserStatus.ACTIVE)
                         .passwordHash(passwordEncoder.encode(UUID.randomUUID().toString())) 
                         .build();
                 return userRepository.save(newUser);
             });
+
+            validateActiveAccount(user);
 
             return buildAuthenticationResponse(user);
 
@@ -143,7 +162,7 @@ public class AuthenticationService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .role("USER")
-                .status("ACTIVE")
+                .status(User.UserStatus.ACTIVE)
                 .build();
 
         userRepository.save(user);
@@ -159,5 +178,15 @@ public class AuthenticationService {
                 .expiresIn(jwtService.getAccessTokenExpirationSeconds())
                 .user(userMapper.toResponse(user))
                 .build();
+    }
+
+    private void validateActiveAccount(User user) {
+        if (user.getStatus() != User.UserStatus.ACTIVE) {
+            throw new AppException(ErrorCode.ACCOUNT_BANNED);
+        }
+    }
+
+    private boolean isActiveAccount(User user) {
+        return user.getStatus() == User.UserStatus.ACTIVE;
     }
 }

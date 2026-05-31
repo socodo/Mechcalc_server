@@ -2,6 +2,8 @@ package com.socodo.mechcalc.user.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,6 +30,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 public class User {
+
+    public enum UserStatus {
+        ACTIVE,
+        BANNED
+    }
 
     @Id
     @EqualsAndHashCode.Include
@@ -59,8 +66,9 @@ public class User {
     private String organization;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private String status = "ACTIVE";
+    private UserStatus status = UserStatus.ACTIVE;
 
     @Builder.Default
     @Column(name = "failed_login_attempts")

@@ -2,6 +2,7 @@ package com.socodo.mechcalc.user.dto.response;
 
 import java.time.Instant;
 import java.util.UUID;
+import com.socodo.mechcalc.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +22,7 @@ public class UserResponse {
     private String phone;
     private String avatarUrl;
     private String organization;
-    private String status;
+    private User.UserStatus status;
     private Integer failedLoginAttempts;
     private Instant lockedUntil;
     private Instant createdAt;

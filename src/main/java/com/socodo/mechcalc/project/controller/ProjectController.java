@@ -3,7 +3,7 @@ package com.socodo.mechcalc.project.controller;
 import com.socodo.mechcalc.common.dto.response.ApiResponse;
 import com.socodo.mechcalc.exception.AppException;
 import com.socodo.mechcalc.exception.ErrorCode;
-import com.socodo.mechcalc.project.dto.request.ProjectSyncRequest;
+import com.socodo.mechcalc.project.dto.request.ProjectSaveRequest;
 import com.socodo.mechcalc.project.dto.response.ProjectResponse;
 import com.socodo.mechcalc.project.service.ProjectService;
 import com.socodo.mechcalc.user.entity.User;
@@ -27,15 +27,15 @@ public class ProjectController {
     UserRepository userRepository; 
 
     @PostMapping("/push")
-    public ApiResponse<String> pushSync(@Valid @RequestBody List<ProjectSyncRequest> requests) {
+    public ApiResponse<String> saveProjects(@Valid @RequestBody List<ProjectSaveRequest> requests) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
                 
-        projectService.syncProjects(requests, user.getId());
+        projectService.saveProjects(requests, user.getId());
 
-        return ApiResponse.success("Sync successful", "Project data synchronized successfully");
+        return ApiResponse.success("Lưu danh sách dự án thành công", "Dữ liệu dự án đã được lưu.");
     }
 
     @GetMapping
@@ -46,6 +46,6 @@ public class ProjectController {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         List<ProjectResponse> projects = projectService.getMyProjects(user.getId());
-        return ApiResponse.success("Projects fetched successfully", projects);
+        return ApiResponse.success("Lấy danh sách dự án thành công", projects);
     }
 }

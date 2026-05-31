@@ -14,8 +14,10 @@ public class MotorCalculationResponse {
     private Double nPreliminary;
     private Double uTotalReal;
     private Double uHReal;
+    private Double unt;
     private Double u1;
     private Double u2;
+    private Double ux;
     private MotorCatalogResponse selectedMotor;
     private KinematicTableResponse kinematicTable; 
     private Instant updatedAt;

@@ -1,4 +1,4 @@
-package com.socodo.mechcalc.auth.dto.respone;
+package com.socodo.mechcalc.auth.dto.response;
 
 import com.socodo.mechcalc.user.dto.response.UserResponse;
 
@@ -20,4 +20,3 @@ public class AuthenticationResponse {
     private long expiresIn;
     private UserResponse user;
 }
-

@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.socodo.mechcalc.auth.service.JwtService;
+import com.socodo.mechcalc.user.entity.User;
+import com.socodo.mechcalc.user.repository.UserRepository;
 
 import java.util.List;
 @Slf4j
@@ -27,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -47,7 +50,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (SecurityContextHolder.getContext().getAuthentication() == null
                     && jwtService.isAccessTokenValid(token)) {
                 String subject = jwtService.extractSubject(token);
-                String role = jwtService.extractRole(token);
+                User user = userRepository.findByEmail(subject)
+                        .filter(this::isActiveAccount)
+                        .orElse(null);
+
+                if (user == null) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                String role = user.getRole();
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(subject, null, authorities);
@@ -61,5 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isActiveAccount(User user) {
+        return user.getStatus() == User.UserStatus.ACTIVE;
     }
 }

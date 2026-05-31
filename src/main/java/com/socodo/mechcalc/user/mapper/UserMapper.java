@@ -7,17 +7,18 @@ import com.socodo.mechcalc.user.entity.User;
 
 import java.util.List;
 import org.mapstruct.BeanMapping;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
-    @Mapping(target = "status", ignore = true) //ACTIVE, INACTIVE, BANNED
+    @Mapping(target = "status", ignore = true) //ACTIVE, BANNED
     @Mapping(target = "failedLoginAttempts", ignore = true)
     @Mapping(target = "lockedUntil", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

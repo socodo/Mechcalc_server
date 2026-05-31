@@ -1,21 +1,22 @@
 package com.socodo.mechcalc.common.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApiResponse<T> {
 
+    private static final String SUCCESS_CODE = "SUCCESS";
+    private static final String ERROR_CODE = "ERROR";
+
     @Builder.Default
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private Instant timestamp = Instant.now();
 
     private String code;
     private boolean success;
@@ -23,33 +24,31 @@ public class ApiResponse<T> {
     private T data;
 
     public static <T> ApiResponse<T> success(String message, T data) {
-        return ApiResponse.<T>builder()
-                .code("SUCCESS")
-                .success(true)
-                .message(message)
-                .data(data)
-                .build();
+        return build(SUCCESS_CODE, true, message, data);
     }
 
     public static ApiResponse<Void> success(String message) {
-        return ApiResponse.<Void>builder()
-                .code("SUCCESS")
-                .success(true)
-                .message(message)
-                .data(null)
-                .build();
+        return build(SUCCESS_CODE, true, message, null);
     }
 
-    public static <T> ApiResponse<T> error(String message) {
-        return error("ERROR", message);
+    public static ApiResponse<Void> error(String message) {
+        return error(ERROR_CODE, message);
     }
 
-    public static <T> ApiResponse<T> error(String code, String message) {
+    public static ApiResponse<Void> error(String code, String message) {
+        return build(code, false, message, null);
+    }
+
+    public static <T> ApiResponse<T> error(String code, String message, T data) {
+        return build(code, false, message, data);
+    }
+
+    private static <T> ApiResponse<T> build(String code, boolean success, String message, T data) {
         return ApiResponse.<T>builder()
                 .code(code)
-                .success(false)
+                .success(success)
                 .message(message)
-                .data(null)
+                .data(data)
                 .build();
     }
 }

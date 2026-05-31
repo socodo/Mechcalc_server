@@ -1,6 +1,8 @@
 package com.socodo.mechcalc.project.service;
 
-import com.socodo.mechcalc.project.dto.request.ProjectSyncRequest;
+import com.socodo.mechcalc.exception.AppException;
+import com.socodo.mechcalc.exception.ErrorCode;
+import com.socodo.mechcalc.project.dto.request.ProjectSaveRequest;
 import com.socodo.mechcalc.project.dto.response.ProjectResponse;
 import com.socodo.mechcalc.project.entity.Project;
 import com.socodo.mechcalc.project.mapper.ProjectMapper;
@@ -29,10 +31,12 @@ public class ProjectService {
     ProjectMapper projectMapper;
 
     @Transactional
-    public void syncProjects(List<ProjectSyncRequest> requests, UUID userId) {
+    public void saveProjects(List<ProjectSaveRequest> requests, UUID userId) {
         
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        requests.forEach(request -> validateProjectOwnership(request, userId));
 
         List<Project> projectsToSave = requests.stream()
                 .map(req -> projectMapper.toEntity(req, user))
@@ -46,5 +50,16 @@ public class ProjectService {
                 .stream()
                 .map(projectMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    private void validateProjectOwnership(ProjectSaveRequest request, UUID userId) {
+        if (request.getId() == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Mã dự án không được để trống");
+        }
+
+        boolean projectExists = projectRepository.existsById(request.getId());
+        if (projectExists && !projectRepository.existsByIdAndUserId(request.getId(), userId)) {
+            throw new AppException(ErrorCode.FORBIDDEN, "Không thể lưu dự án của người dùng khác");
+        }
     }
 }

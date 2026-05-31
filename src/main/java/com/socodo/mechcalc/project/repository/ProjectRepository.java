@@ -6,9 +6,12 @@ import org.springframework.stereotype.Repository;
 import com.socodo.mechcalc.project.entity.Project;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     List<Project> findAllByUserIdAndDeletedAtIsNull(UUID userId);
+    Optional<Project> findByIdAndUserEmail(UUID id, String email);
+    boolean existsByIdAndUserId(UUID id, UUID userId);
 }

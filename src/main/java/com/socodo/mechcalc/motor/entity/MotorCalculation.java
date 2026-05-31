@@ -45,14 +45,17 @@ public class MotorCalculation {
     @Column(name = "u_h_real")
     private Double uHReal;
 
+    @Column(name = "u_nt")
+    private Double unt;
+
     @Column(name = "u_1")
     private Double u1;
 
     @Column(name = "u_2")
     private Double u2;
 
-    @Column(name = "sync_status", length = 20)
-    private String syncStatus;
+    @Column(name = "u_x")
+    private Double ux;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "kinematic_table", columnDefinition = "jsonb")

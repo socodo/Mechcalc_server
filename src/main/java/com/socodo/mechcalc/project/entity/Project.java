@@ -24,12 +24,6 @@ public class Project {
         ARCHIVED
     }
 
-    public enum SyncStatus {
-        SYNCED,
-        PENDING,
-        CONFLICT
-    }
-
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -48,11 +42,6 @@ public class Project {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ProjectStatus status = ProjectStatus.IN_PROGRESS;
-
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(name = "sync_status", length = 20)
-    private SyncStatus syncStatus = SyncStatus.SYNCED;
 
     @Column(name = "deleted_at")
     private Instant deletedAt;

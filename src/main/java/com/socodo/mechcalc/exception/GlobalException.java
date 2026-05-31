@@ -3,6 +3,8 @@ package com.socodo.mechcalc.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,18 +31,29 @@ public class GlobalException {
         );
 
         return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus())
-                .body(ApiResponse.<Map<String, String>>builder()
-                        .code(ErrorCode.INVALID_REQUEST.name())
-                        .success(false)
-                        .message(ErrorCode.INVALID_REQUEST.getMessage())
-                        .data(errors)
-                        .build());
+                .body(ApiResponse.error(
+                        ErrorCode.INVALID_REQUEST.name(),
+                        ErrorCode.INVALID_REQUEST.getMessage(),
+                        errors
+                ));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException exception) {
         return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus())
                 .body(ApiResponse.error(ErrorCode.INVALID_REQUEST.name(), exception.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException() {
+        return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus())
+                .body(ApiResponse.error(ErrorCode.INVALID_REQUEST.name(), ErrorCode.INVALID_REQUEST.getMessage()));
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException() {
+        return ResponseEntity.status(ErrorCode.FORBIDDEN.getStatus())
+                .body(ApiResponse.error(ErrorCode.FORBIDDEN.name(), ErrorCode.FORBIDDEN.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
