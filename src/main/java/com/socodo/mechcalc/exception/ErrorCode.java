@@ -17,6 +17,7 @@ public enum ErrorCode {
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy dự án."),
     CALCULATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy kết quả tính chọn động cơ."),
     CHAIN_CALCULATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy kết quả tính bộ truyền xích."),
+    GEAR_CALCULATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Không tìm thấy kết quả tính bộ truyền bánh răng."),
     ACCOUNT_BANNED(HttpStatus.FORBIDDEN, "Tài khoản đã bị cấm. Vui lòng liên hệ quản trị viên."),
     ACCOUNT_LOCKED(HttpStatus.FORBIDDEN, "Tài khoản đã bị khóa tạm thời do đăng nhập sai quá 5 lần. Vui lòng thử lại sau 15 phút.");
     private final HttpStatus status;
