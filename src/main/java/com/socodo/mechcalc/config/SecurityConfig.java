@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.nio.charset.StandardCharsets;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -41,36 +43,37 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(AbstractHttpConfigurer::disable)
-        .cors(Customizer.withDefaults())
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-              "/auth/**",             
+        http
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(Customizer.withDefaults())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/auth/**",
                     "/v3/api-docs",
-                    "/v3/api-docs/**",     
+                    "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html"
-            ).permitAll()
-            .requestMatchers(org.springframework.http.HttpMethod.GET, "/users").hasAuthority("ADMIN")
-            .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/users/**").hasAuthority("ADMIN")
-            .anyRequest().authenticated())
-        .exceptionHandling(exception -> exception
-            .authenticationEntryPoint((request, response, authException) ->
-                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED", "Bạn cần đăng nhập để tiếp tục."))
-            .accessDeniedHandler((request, response, accessDeniedException) ->
-                writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "FORBIDDEN", "Bạn không có quyền thực hiện thao tác này.")))
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                ).permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/users").hasAuthority("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/users/**").hasAuthority("ADMIN")
+                .anyRequest().authenticated())
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) ->
+                    writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED", "Bạn cần đăng nhập để tiếp tục."))
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                    writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "FORBIDDEN", "Bạn không có quyền thực hiện thao tác này.")))
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
+        return http.build();
     }
 
     private void writeErrorResponse(HttpServletResponse response, int status, String code, String message)
         throws java.io.IOException {
-    response.setStatus(status);
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    ApiResponse<Void> body = ApiResponse.error(code, message);
-    response.getWriter().write(objectMapper.writeValueAsString(body));
+        response.setStatus(status);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        ApiResponse<Void> body = ApiResponse.error(code, message);
+        response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 }
