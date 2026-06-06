@@ -1,5 +1,6 @@
 package com.socodo.mechcalc.gear.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.UUID;
@@ -8,9 +9,13 @@ import java.util.UUID;
 public class GearCalculationRequest {
     private UUID id;
     private UUID projectId;
+    @JsonProperty("nI")
     private Double nI;
+    @JsonProperty("nII")
     private Double nII;
+    @JsonProperty("tI")
     private Double tI;
+    @JsonProperty("tII")
     private Double tII;
     private Double u1;
     private Double u2;
