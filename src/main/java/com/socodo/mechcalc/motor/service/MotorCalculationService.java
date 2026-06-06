@@ -32,7 +32,7 @@ public class MotorCalculationService {
     @Transactional
     public void syncCalculation(MotorCalculationRequest request) {
         String email = getCurrentUserEmail();
-        Project project = projectRepository.findByIdAndUserEmail(request.getProjectId(), email)
+        Project project = projectRepository.findByIdAndUserEmailAndDeletedAtIsNull(request.getProjectId(), email)
                 .orElseThrow(() -> new AppException(ErrorCode.PROJECT_NOT_FOUND));
 
         MotorCalculation calculation = calculationRepository.findByProjectIdAndProjectUserEmail(request.getProjectId(), email)
@@ -61,9 +61,19 @@ public class MotorCalculationService {
 
     @Transactional(readOnly = true)
     public MotorCalculationResponse getByProject(UUID projectId) {
+        ensureActiveProject(projectId);
         MotorCalculation calculation = calculationRepository.findByProjectIdAndProjectUserEmail(projectId, getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.CALCULATION_NOT_FOUND));
         return calculationMapper.toResponse(calculation);
+    }
+
+    @Transactional
+    public void deleteByProject(UUID projectId) {
+        ensureActiveProject(projectId);
+        MotorCalculation calculation = calculationRepository.findByProjectIdAndProjectUserEmail(projectId, getCurrentUserEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.CALCULATION_NOT_FOUND));
+
+        calculationRepository.delete(calculation);
     }
 
     private void validateNewCalculationId(MotorCalculationRequest request) {
@@ -88,6 +98,11 @@ public class MotorCalculationService {
                 && request.getKinematicTable().getMotor().getRatio() == null) {
             request.getKinematicTable().getMotor().setRatio(request.getUnt());
         }
+    }
+
+    private void ensureActiveProject(UUID projectId) {
+        projectRepository.findByIdAndUserEmailAndDeletedAtIsNull(projectId, getCurrentUserEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private String getCurrentUserEmail() {

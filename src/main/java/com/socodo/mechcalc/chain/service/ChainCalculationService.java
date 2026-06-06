@@ -27,7 +27,7 @@ public class ChainCalculationService {
     @Transactional
     public void syncCalculation(ChainCalculationRequest request) {
         String email = getCurrentUserEmail();
-        Project project = projectRepository.findByIdAndUserEmail(request.getProjectId(), email)
+        Project project = projectRepository.findByIdAndUserEmailAndDeletedAtIsNull(request.getProjectId(), email)
                 .orElseThrow(() -> new AppException(ErrorCode.PROJECT_NOT_FOUND));
 
         ChainCalculation calculation = calculationRepository.findByProjectIdAndProjectUserEmail(request.getProjectId(), email)
@@ -45,9 +45,19 @@ public class ChainCalculationService {
 
     @Transactional(readOnly = true)
     public ChainCalculationResponse getByProject(UUID projectId) {
+        ensureActiveProject(projectId);
         ChainCalculation calculation = calculationRepository.findByProjectIdAndProjectUserEmail(projectId, getCurrentUserEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.CHAIN_CALCULATION_NOT_FOUND));
         return calculationMapper.toResponse(calculation);
+    }
+
+    @Transactional
+    public void deleteByProject(UUID projectId) {
+        ensureActiveProject(projectId);
+        ChainCalculation calculation = calculationRepository.findByProjectIdAndProjectUserEmail(projectId, getCurrentUserEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.CHAIN_CALCULATION_NOT_FOUND));
+
+        calculationRepository.delete(calculation);
     }
 
     private void validateNewCalculationId(ChainCalculationRequest request) {
@@ -60,6 +70,11 @@ public class ChainCalculationService {
                 .ifPresent(calculation -> {
                     throw new AppException(ErrorCode.INVALID_REQUEST, "Mã kết quả tính toán đã thuộc về dự án khác");
                 });
+    }
+
+    private void ensureActiveProject(UUID projectId) {
+        projectRepository.findByIdAndUserEmailAndDeletedAtIsNull(projectId, getCurrentUserEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private String getCurrentUserEmail() {

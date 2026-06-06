@@ -11,6 +11,7 @@ import com.socodo.mechcalc.user.repository.UserRepository;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,12 +41,43 @@ public class ProjectController {
 
     @GetMapping
     public ApiResponse<List<ProjectResponse>> getMyProjects() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        User user = getCurrentUser();
 
         List<ProjectResponse> projects = projectService.getMyProjects(user.getId());
         return ApiResponse.success("Lấy danh sách dự án thành công", projects);
+    }
+
+    @PostMapping
+    public ApiResponse<ProjectResponse> createProject(@Valid @RequestBody ProjectSaveRequest request) {
+        ProjectResponse project = projectService.createProject(request, getCurrentUser().getId());
+        return ApiResponse.success("Tạo dự án thành công", project);
+    }
+
+    @GetMapping("/{projectId}")
+    public ApiResponse<ProjectResponse> getProject(@PathVariable UUID projectId) {
+        ProjectResponse project = projectService.getProject(projectId, getCurrentUser().getId());
+        return ApiResponse.success("Lấy thông tin dự án thành công", project);
+    }
+
+    @PutMapping("/{projectId}")
+    public ApiResponse<ProjectResponse> updateProject(
+            @PathVariable UUID projectId,
+            @Valid @RequestBody ProjectSaveRequest request
+    ) {
+        ProjectResponse project = projectService.updateProject(projectId, request, getCurrentUser().getId());
+        return ApiResponse.success("Cập nhật dự án thành công", project);
+    }
+
+    @DeleteMapping("/{projectId}")
+    public ApiResponse<Void> deleteProject(@PathVariable UUID projectId) {
+        projectService.deleteProject(projectId, getCurrentUser().getId());
+        return ApiResponse.success("Xóa dự án thành công");
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 }
