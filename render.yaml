@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: mechcalc-server
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/v3/api-docs
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+        value: org.postgresql.Driver
+      - key: SECURITY_JWT_SECRET_KEY
+        sync: false
+      - key: SECURITY_JWT_EXPIRATION_TIME
+        value: 3600000
+      - key: SECURITY_JWT_REFRESH_TOKEN_EXPIRATION
+        value: 604800000
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: APP_LOG_LEVEL
+        value: INFO
+      - key: HIBERNATE_SQL_LOG_LEVEL
+        value: WARN
+      - key: HIBERNATE_BIND_LOG_LEVEL
+        value: WARN
