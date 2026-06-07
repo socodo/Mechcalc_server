@@ -27,18 +27,6 @@ public class ProjectController {
     ProjectService projectService;
     UserRepository userRepository; 
 
-    @PostMapping("/push")
-    public ApiResponse<String> saveProjects(@Valid @RequestBody List<ProjectSaveRequest> requests) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-                
-        projectService.saveProjects(requests, user.getId());
-
-        return ApiResponse.success("Lưu danh sách dự án thành công", "Dữ liệu dự án đã được lưu.");
-    }
-
     @GetMapping
     public ApiResponse<List<ProjectResponse>> getMyProjects() {
         User user = getCurrentUser();

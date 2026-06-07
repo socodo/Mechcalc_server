@@ -32,21 +32,6 @@ public class ProjectService {
     UserRepository userRepository;
     ProjectMapper projectMapper;
 
-    @Transactional
-    public void saveProjects(List<ProjectSaveRequest> requests, UUID userId) {
-        
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-        requests.forEach(request -> validateProjectOwnership(request, userId));
-
-        List<Project> projectsToSave = requests.stream()
-                .map(req -> projectMapper.toEntity(req, user))
-                .collect(Collectors.toList());
-
-        projectRepository.saveAll(projectsToSave);
-    }
-
     @Transactional(readOnly = true)
     public List<ProjectResponse> getMyProjects(UUID userId) {
         return projectRepository.findAllByUserIdAndDeletedAtIsNull(userId)
@@ -96,17 +81,6 @@ public class ProjectService {
 
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
-    }
-
-    private void validateProjectOwnership(ProjectSaveRequest request, UUID userId) {
-        if (request.getId() == null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Mã dự án không được để trống");
-        }
-
-        boolean projectExists = projectRepository.existsById(request.getId());
-        if (projectExists && !projectRepository.existsByIdAndUserId(request.getId(), userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN, "Không thể lưu dự án của người dùng khác");
-        }
     }
 
     private void applyProjectFields(Project project, ProjectSaveRequest request) {
